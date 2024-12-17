@@ -1,0 +1,7 @@
+2024-12-18T00:01:31.575+05:30 DEBUG 37619 --- [scheduling-1] c.e.q.service.impl.SessionServiceImpl    : Running scheduled cleanup of inactive sessions
+2024-12-18T00:01:31.585+05:30  INFO 37619 --- [scheduling-1] c.e.q.service.impl.SessionServiceImpl    : Cleaned up 0 inactive sessions
+2024-12-18T00:06:31.575+05:30 DEBUG 37619 --- [scheduling-1] c.e.q.service.impl.SessionServiceImpl    : Running scheduled cleanup of inactive sessions
+2024-12-18T00:06:31.582+05:30  INFO 37619 --- [scheduling-1] c.e.q.service.impl.SessionServiceImpl    : Cleaned up 0 inactive sessions
+2024-12-18T00:08:16.046+05:30  INFO 37619 --- [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2024-12-18T00:08:16.048+05:30  INFO 37619 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2024-12-18T00:08:16.050+05:30  INFO 37619 --- [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
