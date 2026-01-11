@@ -26,4 +26,7 @@ public class QuizSession {
 
     @Column(nullable = false)
     private int correctAnswers = 0;
+
+    @Column(name = "current_question_id")
+    private Long currentQuestionId;
 }

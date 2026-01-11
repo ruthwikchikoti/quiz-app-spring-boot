@@ -3,6 +3,7 @@ package com.example.quizapp.service.impl;
 import com.example.quizapp.dto.QuestionDTO;
 import com.example.quizapp.exception.QuizException;
 import com.example.quizapp.model.Question;
+import com.example.quizapp.model.QuizSession;
 import com.example.quizapp.repository.QuestionRepository;
 import com.example.quizapp.service.interfaces.QuestionService;
 import com.example.quizapp.service.interfaces.SessionService;
@@ -24,12 +25,16 @@ public class QuestionServiceImpl implements QuestionService {
     @Transactional
     public QuestionDTO getNextQuestion(Long sessionId) {
         logger.debug("Fetching next question for session: {}", sessionId);
-        sessionService.validateAndUpdateSession(sessionId);
+        QuizSession session = sessionService.validateAndUpdateSession(sessionId);
 
         Question question = questionRepository.findRandomQuestion();
         if (question == null) {
             throw new QuizException("No questions available");
         }
+
+        // Store the current question ID in the session
+        session.setCurrentQuestionId(question.getId());
+        sessionService.saveSession(session);
 
         QuestionDTO dto = mapQuestionToDTO(question);
         dto.setTimestamp(System.currentTimeMillis());

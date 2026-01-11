@@ -30,7 +30,13 @@ public class AnswerServiceImpl implements AnswerService {
     @Transactional
     public boolean submitAnswer(Long sessionId, String answer) {
         QuizSession session = sessionService.validateAndUpdateSession(sessionId);
-        Question currentQuestion = questionRepository.findRandomQuestion();
+
+        if (session.getCurrentQuestionId() == null) {
+            throw new RuntimeException("No current question set for this session");
+        }
+
+        Question currentQuestion = questionRepository.findById(session.getCurrentQuestionId())
+                .orElseThrow(() -> new RuntimeException("Question not found"));
 
         boolean isCorrect = currentQuestion.getCorrectAnswer().equalsIgnoreCase(answer);
 
@@ -53,7 +59,13 @@ public class AnswerServiceImpl implements AnswerService {
     @Override
     public UserResponse saveUserResponse(Long sessionId, String answer, boolean isCorrect) {
         QuizSession session = sessionService.validateAndUpdateSession(sessionId);
-        Question currentQuestion = questionRepository.findRandomQuestion();
+
+        if (session.getCurrentQuestionId() == null) {
+            throw new RuntimeException("No current question set for this session");
+        }
+
+        Question currentQuestion = questionRepository.findById(session.getCurrentQuestionId())
+                .orElseThrow(() -> new RuntimeException("Question not found"));
 
         UserResponse response = new UserResponse();
         response.setQuizSession(session);

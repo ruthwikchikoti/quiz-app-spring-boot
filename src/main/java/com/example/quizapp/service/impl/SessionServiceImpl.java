@@ -53,6 +53,12 @@ public class SessionServiceImpl implements SessionService {
 
     @Override
     @Transactional
+    public void saveSession(QuizSession session) {
+        quizSessionRepository.save(session);
+    }
+
+    @Override
+    @Transactional
     public QuizSession validateAndUpdateSession(Long sessionId) {
         if (sessionId == null) {
             logger.error("Session ID is null");

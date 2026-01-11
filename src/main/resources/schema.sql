@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS questions (
     optionb VARCHAR(255) NOT NULL,
     optionc VARCHAR(255) NOT NULL,
     optiond VARCHAR(255) NOT NULL,
-    correct_answer VARCHAR(1) NOT NULL,
+    correct_answer VARCHAR(255) NOT NULL,
     difficulty VARCHAR(20) NOT NULL,
     category VARCHAR(50) NOT NULL,
     time_limit INT DEFAULT 20 NOT NULL
@@ -17,14 +17,15 @@ CREATE TABLE IF NOT EXISTS quiz_sessions (
                                              last_access_time TIMESTAMP NOT NULL,
                                              active BOOLEAN NOT NULL DEFAULT TRUE,
                                              total_questions INT NOT NULL DEFAULT 0,
-                                             correct_answers INT NOT NULL DEFAULT 0
+                                             correct_answers INT NOT NULL DEFAULT 0,
+                                             current_question_id BIGINT
 );
 
 CREATE TABLE IF NOT EXISTS user_responses (
                                               id BIGINT AUTO_INCREMENT PRIMARY KEY,
                                               session_id BIGINT NOT NULL,
                                               question_id BIGINT NOT NULL,
-                                              user_answer VARCHAR(1) NOT NULL,
+                                              user_answer VARCHAR(255) NOT NULL,
     correct BOOLEAN NOT NULL,
     answered_at TIMESTAMP NOT NULL,
     response_time INT,
