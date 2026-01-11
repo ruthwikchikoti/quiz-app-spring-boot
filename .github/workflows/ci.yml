@@ -19,5 +19,8 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
+      - name: Code Quality Check (Checkstyle)
+        run: ./mvnw validate
+
       - name: Build application
         run: ./mvnw clean package
