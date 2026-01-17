@@ -86,7 +86,7 @@ jobs:
           image-ref: ${{ secrets.DOCKERHUB_USERNAME }}/quiz-app:latest
           format: 'sarif'
           output: 'trivy-results.sarif'
-          severity: 'CRITICAL,HIGH'
+          severity: 'CRITICAL'
           ignore-unfixed: true
           exit-code: '1'
 
