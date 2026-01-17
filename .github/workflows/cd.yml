@@ -1,0 +1,113 @@
+name: Quiz App CD
+
+on:
+  # Trigger after CI workflow completes successfully
+  workflow_run:
+    workflows: ["Quiz App CI"]
+    types:
+      - completed
+    branches: [ "main" ]
+  # Allow manual trigger
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    # Only run if CI was successful
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+
+    steps:
+      # ----------------------------------------------------
+      # 1. Checkout
+      # ----------------------------------------------------
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      # ----------------------------------------------------
+      # 2. Verify Minikube is running
+      # ----------------------------------------------------
+      - name: Verify Minikube status
+        run: |
+          export PATH="$HOME/.local/bin:$PATH"
+          minikube status
+          kubectl get nodes
+
+      # ----------------------------------------------------
+      # 3. Update image tag in deployment
+      # ----------------------------------------------------
+      - name: Update deployment image
+        run: |
+          sed -i "s|image: .*quiz-app:.*|image: ${{ secrets.DOCKERHUB_USERNAME }}/quiz-app:latest|g" k8s/deployment.yaml
+          cat k8s/deployment.yaml | grep image:
+
+      # ----------------------------------------------------
+      # 4. Deploy to Kubernetes
+      # ----------------------------------------------------
+      - name: Create namespace (if not exists)
+        run: |
+          export PATH="$HOME/.local/bin:$PATH"
+          kubectl apply -f k8s/namespace.yaml
+
+      - name: Apply ConfigMap
+        run: |
+          export PATH="$HOME/.local/bin:$PATH"
+          kubectl apply -f k8s/configmap.yaml
+
+      - name: Deploy application
+        run: |
+          export PATH="$HOME/.local/bin:$PATH"
+          kubectl apply -f k8s/deployment.yaml
+
+      - name: Apply Service
+        run: |
+          export PATH="$HOME/.local/bin:$PATH"
+          kubectl apply -f k8s/service.yaml
+
+      # ----------------------------------------------------
+      # 5. Wait for deployment rollout
+      # ----------------------------------------------------
+      - name: Wait for deployment to be ready
+        run: |
+          export PATH="$HOME/.local/bin:$PATH"
+          kubectl rollout status deployment/quiz-app -n quiz-app --timeout=300s
+
+      # ----------------------------------------------------
+      # 6. Verify deployment
+      # ----------------------------------------------------
+      - name: Verify deployment
+        run: |
+          export PATH="$HOME/.local/bin:$PATH"
+          echo "=== Deployment Status ==="
+          kubectl get deployment -n quiz-app
+          echo ""
+          echo "=== Pod Status ==="
+          kubectl get pods -n quiz-app
+          echo ""
+          echo "=== Service Status ==="
+          kubectl get svc -n quiz-app
+
+      # ----------------------------------------------------
+      # 7. Basic Health Check (Smoke Test)
+      # ----------------------------------------------------
+      - name: Run smoke test
+        run: |
+          export PATH="$HOME/.local/bin:$PATH"
+
+          # Get service URL
+          SERVICE_URL=$(minikube service quiz-app-service -n quiz-app --url)
+          echo "Service URL: $SERVICE_URL"
+
+          # Test the API
+          echo "Testing API endpoint..."
+          curl -s -X POST "$SERVICE_URL/api/quiz/start" \
+            -H "Content-Type: application/json" \
+            -d '{"username":"github-actions-test"}' || true
+
+          # Check if pods are running
+          READY_PODS=$(kubectl get pods -n quiz-app -l app=quiz-app -o jsonpath='{.items[*].status.conditions[?(@.type=="Ready")].status}' | grep -c "True" || echo "0")
+          if [ "$READY_PODS" -lt 1 ]; then
+            echo "ERROR: No pods are ready!"
+            kubectl describe pods -n quiz-app
+            exit 1
+          fi
+          echo "SUCCESS: $READY_PODS pod(s) are ready and running"
