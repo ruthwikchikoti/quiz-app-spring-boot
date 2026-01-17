@@ -102,9 +102,8 @@ jobs:
       - name: Run container and test
         run: |
           docker run -d -p 8080:8080 --name quiz-app-test ${{ secrets.DOCKERHUB_USERNAME }}/quiz-app:latest
-          sleep 15
-          curl -f http://localhost:8080 || exit 1
-          docker logs quiz-app-test
+          sleep 20
+          curl -f -X POST http://localhost:8080/api/quiz/start -H "Content-Type: application/json" -d '{"username":"citest"}' || exit 1
           docker stop quiz-app-test
           docker rm quiz-app-test
 
