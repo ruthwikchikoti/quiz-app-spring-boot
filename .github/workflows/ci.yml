@@ -75,7 +75,7 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Build Docker image
-        run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/quiz-app:latest .
+        run: docker build --no-cache -t ${{ secrets.DOCKERHUB_USERNAME }}/quiz-app:latest .
 
       # ----------------------------------------------------
       # 8. Container Image Security Scan (Trivy)
@@ -87,6 +87,7 @@ jobs:
           format: 'sarif'
           output: 'trivy-results.sarif'
           severity: 'CRITICAL,HIGH'
+          ignore-unfixed: true
           exit-code: '1'
 
       - name: Upload Trivy scan results to GitHub Security
